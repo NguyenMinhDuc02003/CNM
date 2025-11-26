@@ -1,0 +1,80 @@
+body {
+    background-image: url('../img/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(66, 65, 65, 0.5);
+    /* Overlay mờ */
+    z-index: 0;
+}
+
+.container {
+    max-width: 1400px;
+    /* Tăng chiều rộng container */
+}
+
+.btn:hover {
+    background-color: none;
+}
+
+.erp-button {
+    width: 150px;
+    /* Tăng kích thước nút */
+    height: 140px;
+    margin: 20px 30px;
+    /* Tăng khoảng cách giữa các nút */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s;
+    border-radius: 15px;
+    /* Bo góc nút */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Thêm bóng đổ */
+
+
+}
+
+.erp-button:hover {
+    transform: scale(1.15);
+    box-shadow: 0 7px 20px rgba(73, 73, 73, 0.559);
+    opacity: 1 !important;
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #212529 !important;
+}
+
+.erp-button i {
+    font-size: 3rem;
+    /* Tăng kích thước icon */
+    margin-bottom: 15px;
+}
+
+.erp-button span {
+    font-size: 1.2rem;
+    /* Tăng kích thước chữ */
+    font-weight: 500;
+}
+
+.row {
+    margin: 20px 0;
+    /* Thêm khoảng cách trên dưới */
+}
+
+.col-12 {
+    padding: 20px;
+    /* Thêm padding cho container */
+}
