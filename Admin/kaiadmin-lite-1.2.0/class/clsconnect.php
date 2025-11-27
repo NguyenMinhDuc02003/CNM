@@ -1,5 +1,5 @@
 <?php
-if (class_exists('connect_db')) {
+if (class_exists('connect_db', false)) {
     return;
 }
 
@@ -21,8 +21,8 @@ class connect_db
 
     private $conn;
     private $host = "localhost";
-    private $user = "root";
-    private $pass = "";
+    private $user = "appuser";
+    private $pass = "StrongPass1234";
     private $db = "hceeab2b55_restaurant";
 
     /**

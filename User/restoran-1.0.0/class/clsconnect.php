@@ -9,11 +9,11 @@ error_reporting(E_ALL);
 
 class connect_db
 {
-    private $conn;
+     private $conn;
     private $host = "localhost";
-    private $user = "cnmuser";
+    private $user = "appuser";
     private $pass = "StrongPass1234";
-    private $db = "cnm";
+    private $db = "hceeab2b55_restaurant";
 
     public function __construct()
     {

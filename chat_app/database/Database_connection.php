@@ -9,8 +9,8 @@ class Database_connection
 {
     private $host = 'localhost';
     private $database = 'hceeab2b55_restaurant';
-    private $username = 'root';
-    private $password = '';
+    private $username = 'appuser';
+    private $password = 'StrongPass1234';
 
     public function connect(): \PDO
     {
