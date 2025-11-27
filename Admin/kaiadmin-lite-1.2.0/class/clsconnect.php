@@ -21,9 +21,9 @@ class connect_db
 
     private $conn;
     private $host = "localhost";
-    private $user = "cnmuser";
-    private $pass = "StrongPass1234";
-    private $db = "cnm";
+    private $user = "root";
+    private $pass = "";
+    private $db = "hceeab2b55_restaurant";
 
     /**
      * Constructor - Establishes database connection

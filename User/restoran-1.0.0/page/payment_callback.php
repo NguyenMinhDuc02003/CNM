@@ -7,8 +7,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$siteBase = '/CNM/User/restoran-1.0.0';
-
 require_once __DIR__ . '/../class/clsconnect.php';
 require_once __DIR__ . '/../class/clsdatban.php';
 require_once __DIR__ . '/../PHPMailer/PHPMailer.php';
@@ -447,7 +445,7 @@ if (isset($_GET['resultCode']) && isset($_GET['orderId'])) {
 
                 if (empty($orderRow)) {
                     $_SESSION['error'] = 'Không tìm thấy đơn hàng để ghi nhận thanh toán.';
-                    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
+                    header('Location: ../index.php?page=profile#bookings');
                     exit;
                 }
 
@@ -480,7 +478,7 @@ if (isset($_GET['resultCode']) && isset($_GET['orderId'])) {
                 }
 
                 $_SESSION['success'] = 'Thanh toán đơn hàng #' . $orderPaymentId . ' thành công.';
-                header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
+                header('Location: ../index.php?page=profile#bookings');
                 exit;
             } else {
                 // Lấy mã đặt bàn từ orderId (đặt cọc)
@@ -532,7 +530,7 @@ if (isset($_GET['resultCode']) && isset($_GET['orderId'])) {
             // Thanh toán thất bại
             if ($isOrderPayment) {
                 $_SESSION['error'] = 'Thanh toán đơn hàng thất bại. ' . $message;
-                header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
+                header('Location: ../index.php?page=profile#bookings');
             } else {
                 $_SESSION['payment_error'] = 'Thanh toán thất bại. ' . $message;
                 header('Location: payment_failed.php');
@@ -543,7 +541,7 @@ if (isset($_GET['resultCode']) && isset($_GET['orderId'])) {
         // Chữ ký không hợp lệ
         if ($isOrderPayment) {
             $_SESSION['error'] = 'Không thể xác thực giao dịch. Vui lòng thử lại.';
-            header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
+            header('Location: ../index.php?page=profile#bookings');
         } else {
             $_SESSION['payment_error'] = 'Chữ ký không hợp lệ. Có thể có lỗi bảo mật.';
             header('Location: payment_failed.php');
@@ -554,6 +552,6 @@ if (isset($_GET['resultCode']) && isset($_GET['orderId'])) {
 
 
 // Nếu không có tham số callback nào, chuyển về trang chủ
-header('Location: ' . $siteBase . '/index.php?page=trangchu');
+header('Location: ../index.php?page=trangchu');
 exit;
 ?>

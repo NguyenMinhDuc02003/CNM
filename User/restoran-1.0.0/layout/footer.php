@@ -89,16 +89,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $showChatWidget = isset($_SESSION['khachhang_id']);
 $chatWidgetUrl = '/CNM/chat_app/chat_widget.php';
-$chatBotUrl = '/CNM/chat_app/chatbot_public.php';
 ?>
 
+<?php if ($showChatWidget): ?>
     <style>
         .cnm-chat-bubble {
             position: fixed;
+            bottom: 24px;
             right: 24px;
             width: 58px;
             height: 58px;
             border-radius: 50%;
+            background: #FEA116;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -108,16 +110,9 @@ $chatBotUrl = '/CNM/chat_app/chatbot_public.php';
             color: #fff;
             font-size: 26px;
         }
-        .cnm-chat-bubble.widget {
-            bottom: 96px;
-            background: #FEA116;
-        }
-        .cnm-chat-bubble.bot {
-            bottom: 24px;
-            background: #0d6efd;
-        }
         .cnm-chat-panel {
             position: fixed;
+            bottom: 96px;
             right: 24px;
             width: 360px;
             max-width: calc(100% - 32px);
@@ -130,12 +125,6 @@ $chatBotUrl = '/CNM/chat_app/chatbot_public.php';
             flex-direction: column;
             z-index: 9999;
         }
-        .cnm-chat-panel.widget {
-            bottom: 168px;
-        }
-        .cnm-chat-panel.bot {
-            bottom: 96px;
-        }
         .cnm-chat-panel.open {
             display: flex;
         }
@@ -146,9 +135,6 @@ $chatBotUrl = '/CNM/chat_app/chatbot_public.php';
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-        .cnm-chat-panel header.bot {
-            background: #0d6efd;
         }
         .cnm-chat-panel header h5 {
             margin: 0;
@@ -170,54 +156,40 @@ $chatBotUrl = '/CNM/chat_app/chatbot_public.php';
             .cnm-chat-panel {
                 width: calc(100% - 32px);
                 height: 70vh;
+                bottom: 96px;
                 right: 16px;
             }
         }
     </style>
 
-    <div id="cnmChatBotBubble" class="cnm-chat-bubble bot" aria-label="Mở chatbot">
-        <i class="fas fa-robot"></i>
-    </div>
-    <div id="cnmChatBotPanel" class="cnm-chat-panel bot" aria-live="polite">
-        <header class="bot">
-            <h5>Chatbot</h5>
-            <button type="button" data-close-panel aria-label="Đóng chat">&times;</button>
-        </header>
-        <iframe src="<?php echo htmlspecialchars($chatBotUrl, ENT_QUOTES, 'UTF-8'); ?>"></iframe>
+    <div id="cnmChatBubble" class="cnm-chat-bubble" aria-label="Mở chat hỗ trợ">
+        <i class="fas fa-comments"></i>
     </div>
 
-    <?php if ($showChatWidget): ?>
-        <div id="cnmChatWidgetBubble" class="cnm-chat-bubble widget" aria-label="Mở chat hỗ trợ">
-            <i class="fas fa-comments"></i>
-        </div>
-        <div id="cnmChatWidgetPanel" class="cnm-chat-panel widget" aria-live="polite">
-            <header>
-                <h5>Chat hỗ trợ</h5>
-                <button type="button" data-close-panel aria-label="Đóng chat">&times;</button>
-            </header>
-            <iframe src="<?php echo htmlspecialchars($chatWidgetUrl, ENT_QUOTES, 'UTF-8'); ?>"></iframe>
-        </div>
-    <?php endif; ?>
+    <div id="cnmChatPanel" class="cnm-chat-panel" aria-live="polite">
+        <header>
+            <h5>Chat hỗ trợ</h5>
+            <button type="button" id="cnmChatClose" aria-label="Đóng chat">&times;</button>
+        </header>
+        <iframe src="<?php echo htmlspecialchars($chatWidgetUrl, ENT_QUOTES, 'UTF-8'); ?>"></iframe>
+    </div>
 
     <script>
         (function(){
-            function setupBubble(bubbleId, panelId){
-                const bubble = document.getElementById(bubbleId);
-                const panel = document.getElementById(panelId);
-                if(!bubble || !panel){ return; }
+            const bubble = document.getElementById('cnmChatBubble');
+            const panel = document.getElementById('cnmChatPanel');
+            const closeBtn = document.getElementById('cnmChatClose');
 
-                const closeBtn = panel.querySelector('[data-close-panel]');
-                const togglePanel = () => panel.classList.toggle('open');
-
-                bubble.addEventListener('click', togglePanel);
-                if(closeBtn){
-                    closeBtn.addEventListener('click', togglePanel);
-                }
+            if(!bubble || !panel || !closeBtn){
+                return;
             }
 
-            setupBubble('cnmChatBotBubble', 'cnmChatBotPanel');
-            <?php if ($showChatWidget): ?>
-            setupBubble('cnmChatWidgetBubble', 'cnmChatWidgetPanel');
-            <?php endif; ?>
+            const togglePanel = () => {
+                panel.classList.toggle('open');
+            };
+
+            bubble.addEventListener('click', togglePanel);
+            closeBtn.addEventListener('click', togglePanel);
         })();
     </script>
+<?php endif; ?>
