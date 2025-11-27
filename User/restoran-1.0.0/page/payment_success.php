@@ -7,10 +7,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$siteBase = '/CNM/User/restoran-1.0.0';
+
 // Kiểm tra session
 if (!isset($_SESSION['madatban'])) {
     $_SESSION['error'] = 'Không tìm thấy thông tin đặt bàn.';
-    header('Location: ../index.php?page=trangchu');
+    header('Location: ' . $siteBase . '/index.php?page=trangchu');
     exit;
 }
 
@@ -42,7 +44,7 @@ $result = $db->xuatdulieu_prepared($sql, [$_SESSION['madatban']]);
 
 if (empty($result)) {
     $_SESSION['error'] = 'Không tìm thấy thông tin đặt bàn.';
-    header('Location: ../index.php?page=trangchu');
+    header('Location: ' . $siteBase . '/index.php?page=trangchu');
     exit;
 }
 
@@ -376,7 +378,7 @@ unset($_SESSION['madatban'], $_SESSION['payment_method'], $_SESSION['payment_exp
 
                 <!-- Nút hành động -->
                 <div class="text-center mt-4">
-                    <a href="../index.php?page=trangchu" class="btn btn-primary me-3">
+                    <a href="<?php echo $siteBase; ?>/index.php?page=trangchu" class="btn btn-primary me-3">
                         <i class="fas fa-home me-2"></i>Về trang chủ
                     </a>
                     <button type="button" class="btn btn-outline-primary" onclick="window.print()">

@@ -7,6 +7,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$siteBase = '/CNM/User/restoran-1.0.0';
+
 // Debug: Kiểm tra session và GET parameters
 error_log("Debug payment_online: madatban in session = " . (isset($_SESSION['madatban']) ? $_SESSION['madatban'] : 'not set'));
 error_log("Debug payment_online: madatban in GET = " . (isset($_GET['madatban']) ? $_GET['madatban'] : 'not set'));
@@ -14,7 +16,7 @@ error_log("Debug payment_online: madatban in GET = " . (isset($_GET['madatban'])
 // Kiểm tra session và dữ liệu cần thiết
 if (!isset($_SESSION['madatban']) && !isset($_GET['madatban'])) {
     $_SESSION['error'] = 'Thông tin thanh toán không tồn tại. Vui lòng thử lại.';
-    header('Location: ../index.php?page=trangchu');
+    header('Location: ' . $siteBase . '/index.php?page=trangchu');
     exit;
 }
 
@@ -26,17 +28,8 @@ if (isset($_GET['madatban'])) {
     $_SESSION['payment_expires'] = date('Y-m-d H:i:s', strtotime('+6 hours'));
 }
 
-// Kiểm tra thời gian hết hạn (chỉ khi có session payment_expires)
-if (isset($_SESSION['payment_expires'])) {
-    $now = new DateTime();
-    $expires = new DateTime($_SESSION['payment_expires']);
-    if ($now > $expires) {
-        $_SESSION['error'] = 'Đơn hàng đã hết hạn thanh toán. Vui lòng đặt lại.';
-        unset($_SESSION['madatban'], $_SESSION['payment_method'], $_SESSION['payment_expires']);
-        header('Location: ../index.php?page=trangchu');
-        exit;
-    }
-}
+// Đặt timezone sớm để mọi hàm thời gian nhất quán
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 require_once __DIR__ . '/../class/clsconnect.php';
 require_once __DIR__ . '/../class/clsdatban.php';
@@ -47,6 +40,7 @@ $datban = new datban();
 
 $sql = "SELECT
   db.madatban,
+  db.payment_expires,
   db.tenKH,
   db.email,
   db.sodienthoai,
@@ -66,11 +60,44 @@ $result = $db->xuatdulieu_prepared($sql, [$_SESSION['madatban']]);
 
 if (empty($result)) {
     $_SESSION['error'] = 'Không tìm thấy thông tin đặt bàn.';
-    header('Location: ../index.php?page=trangchu');
+    header('Location: ' . $siteBase . '/index.php?page=trangchu');
     exit;
 }
 
 $booking_info = $result[0];
+
+// Lấy hạn thanh toán ưu tiên từ DB, fallback session, cuối cùng +6 giờ
+$paymentExpires = $booking_info['payment_expires'] ?? null;
+if (empty($paymentExpires) && isset($_SESSION['payment_expires'])) {
+    $paymentExpires = $_SESSION['payment_expires'];
+}
+if (empty($paymentExpires)) {
+    $paymentExpires = date('Y-m-d H:i:s', strtotime('+6 hours'));
+}
+// Chuẩn hóa và lưu lại session
+$expiryTs = strtotime($paymentExpires);
+if ($expiryTs === false) {
+    $expiryTs = time() + 6 * 3600;
+    $paymentExpires = date('Y-m-d H:i:s', $expiryTs);
+}
+$_SESSION['payment_expires'] = $paymentExpires;
+// Nếu DB chưa có hạn, cập nhật để đồng bộ (không ảnh hưởng nếu cột đã có)
+if (empty($booking_info['payment_expires'])) {
+    try {
+        $db->tuychinh("UPDATE datban SET payment_expires = ? WHERE madatban = ?", [$paymentExpires, $_SESSION['madatban']]);
+    } catch (Exception $e) {
+        // bỏ qua nếu DB thiếu cột hoặc lỗi quyền
+    }
+}
+
+// Kiểm tra hết hạn theo timestamp
+if (time() > $expiryTs) {
+    $_SESSION['error'] = 'Đơn hàng đã hết hạn thanh toán. Vui lòng đặt lại.';
+    unset($_SESSION['madatban'], $_SESSION['payment_method'], $_SESSION['payment_expires']);
+    header('Location: ' . $siteBase . '/index.php?page=trangchu');
+    exit;
+}
+
 // Lấy thông tin thanh toán đã thực hiện
 $paymentHistory = $db->xuatdulieu_prepared(
     "SELECT COALESCE(SUM(SoTien), 0) AS paid_amount
@@ -158,7 +185,6 @@ function callMomoApi(string $endpoint, array $payload, int $maxRetries = 1): arr
 }
 
 // Tạo dữ liệu thanh toán MoMo
-date_default_timezone_set('Asia/Ho_Chi_Minh');
 $orderId = $_SESSION['madatban'] . '_' . time();
 $requestId = $orderId;
 // Tính khoản đặt cọc bổ sung cần thanh toán
@@ -169,7 +195,7 @@ $amount = max(0, $required_deposit - $paid_amount); // số tiền cần thanh t
 
 if ($amount <= 0) {
     $_SESSION['success'] = 'Đơn đặt bàn đã đạt đủ mức đặt cọc. Không cần thanh toán thêm.';
-    header('Location: ../index.php?page=profile#bookings');
+    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
     exit;
 }
 
@@ -578,7 +604,7 @@ $_SESSION['payment_info'] = [
                     <button type="button" class="btn btn-refresh me-3" onclick="window.location.reload()">
                         <i class="fas fa-sync-alt me-2"></i>Làm mới mã QR
                     </button>
-                    <a href="../index.php?page=trangchu" class="btn btn-back">
+                    <a href="<?php echo $siteBase; ?>/index.php?page=trangchu" class="btn btn-back">
                         <i class="fas fa-home me-2"></i>Về trang chủ
                     </a>
                 </div>
@@ -589,8 +615,8 @@ $_SESSION['payment_info'] = [
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
     <script>
-        // Đếm ngược thời gian hết hạn
-        const expiryTime = new Date('<?php echo date('Y-m-d H:i:s', strtotime($_SESSION['payment_expires'])); ?>').getTime();
+        // Đếm ngược thời gian hết hạn (dùng timestamp để tránh lỗi parse)
+        const expiryTime = <?php echo ($expiryTs * 1000); ?>;
         
         function updateCountdown() {
             const now = new Date().getTime();

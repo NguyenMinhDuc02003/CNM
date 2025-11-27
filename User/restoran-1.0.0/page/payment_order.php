@@ -5,9 +5,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$siteBase = '/CNM/User/restoran-1.0.0';
+
 if (!isset($_SESSION['khachhang_id'])) {
     $_SESSION['error'] = 'Vui lòng đăng nhập để thanh toán.';
-    header('Location: ../index.php?page=login');
+    header('Location: ' . $siteBase . '/index.php?page=login');
     exit;
 }
 
@@ -16,7 +18,7 @@ require_once __DIR__ . '/../class/clsconnect.php';
 $orderId = isset($_GET['idDH']) ? (int)$_GET['idDH'] : 0;
 if ($orderId <= 0) {
     $_SESSION['error'] = 'Không tìm thấy thông tin đơn hàng.';
-    header('Location: ../index.php?page=profile#bookings');
+    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
     exit;
 }
 
@@ -34,7 +36,7 @@ $orderRows = $db->xuatdulieu_prepared(
 
 if (empty($orderRows)) {
     $_SESSION['error'] = 'Đơn hàng không thuộc tài khoản của bạn hoặc không tồn tại.';
-    header('Location: ../index.php?page=profile#bookings');
+    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
     exit;
 }
 
@@ -42,7 +44,7 @@ $order = $orderRows[0];
 $blockedStatuses = ['huy'];
 if (in_array($order['TrangThai'], $blockedStatuses, true)) {
     $_SESSION['error'] = 'Đơn hàng đã bị hủy, không thể thanh toán.';
-    header('Location: ../index.php?page=profile#bookings');
+    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
     exit;
 }
 
@@ -59,7 +61,7 @@ $remaining = max(0, $totalAmount - $paidAmount);
 
 if ($remaining <= 0) {
     $_SESSION['success'] = 'Đơn hàng đã được thanh toán đủ.';
-    header('Location: ../index.php?page=profile#bookings');
+    header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
     exit;
 }
 
@@ -174,5 +176,5 @@ if (!empty($payUrl)) {
 }
 
 $_SESSION['error'] = 'Không thể khởi tạo thanh toán MoMo. Vui lòng thử lại sau.';
-header('Location: ../index.php?page=profile#bookings');
+header('Location: ' . $siteBase . '/index.php?page=profile#bookings');
 exit;

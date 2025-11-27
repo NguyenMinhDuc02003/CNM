@@ -1,4 +1,8 @@
 <?php
+if (class_exists('connect_db')) {
+    return;
+}
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -7,9 +11,9 @@ class connect_db
 {
     private $conn;
     private $host = "localhost";
-    private $user = "root";
-    private $pass = "";
-    private $db = "hceeab2b55_restaurant";
+    private $user = "cnmuser";
+    private $pass = "StrongPass1234";
+    private $db = "cnm";
 
     public function __construct()
     {
